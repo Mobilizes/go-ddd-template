@@ -28,7 +28,7 @@ func NewUserPresentation(i do.Injector) UserPresentation {
 }
 
 func RegisterUserRoutes(r *gin.Engine, p UserPresentation) {
-	userGroup := r.Group("/api/users")
+	userGroup := r.Group("/api/user")
 	{
 		userGroup.POST("", p.Create)
 		userGroup.GET("", p.GetAll)
@@ -124,5 +124,6 @@ func (p *userPresentation) Delete(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusNoContent, dto.MESSAGE_SUCCESS_DELETE_DATA)
+	res := dto.BuildResponseSuccess(dto.MESSAGE_SUCCESS_DELETE_DATA, nil)
+	c.JSON(http.StatusNoContent, res)
 }

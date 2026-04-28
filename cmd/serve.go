@@ -47,11 +47,7 @@ func injectPresentation(injector do.Injector, server *gin.Engine) {
 func Serve() {
 	injector := do.New()
 
-	db, err := SetUpDatabaseConnection()
-	if err != nil {
-		fmt.Printf("error setting up database connection: %v", err)
-		return
-	}
+	db := SetUpDatabaseConnectionOrFail()
 
 	do.Provide(injector, func(i do.Injector) (*gorm.DB, error) {
 		return db, nil

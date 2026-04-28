@@ -21,16 +21,19 @@ usage: go run main.go [options]
 options:
   --serve
     On by default, will be overridden if other options are added
-  --migrate
-    Fresh migrate the database
+  --migrate-up
+    Apply all pending database migrations
+  --migrate-down
+    Roll back the latest database migration
   --seed
     Seed the existing database, will throw error if database hasn't been migrated
 	`
 
 	options := map[string]func(){
-		"--serve":   cmd.Serve,
-		"--migrate": cmd.Migrate,
-		"--seed":    cmd.Seed,
+		"--serve":        cmd.Serve,
+		"--migrate-up":   cmd.MigrateUp,
+		"--migrate-down": cmd.MigrateDown,
+		"--seed":         cmd.Seed,
 	}
 
 	cmds := []string{"--serve"}

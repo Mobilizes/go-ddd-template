@@ -12,8 +12,8 @@ import (
 )
 
 var (
-	ErrUserNotFound       = errors.New("user not found")
-	ErrEmailAlreadyInUse  = errors.New("email already in use")
+	ErrUserNotFound      = errors.New("user not found")
+	ErrEmailAlreadyInUse = errors.New("email already in use")
 )
 
 type UserUseCase interface {
@@ -48,17 +48,13 @@ func (uc *userUseCase) Create(req *dto.UserCreateInput) (*dto.UserOutput, error)
 		return &dto.UserOutput{}, err
 	}
 
-	user := entity.User{
-		Email:        req.Email,
-		Name:         req.Name,
-		PasswordHash: hashedPassword,
-	}
+	user := entity.NewUser(req.Name, req.Email, hashedPassword)
 
-	if err := uc.userRepository.Create(&user); err != nil {
+	if err := uc.userRepository.Create(user); err != nil {
 		return &dto.UserOutput{}, err
 	}
 
-	return dto.UserEntityToOutput(&user), nil
+	return dto.UserEntityToOutput(user), nil
 }
 
 func (uc *userUseCase) GetAll(req *dto.PaginateInput) (*dto.PaginatedOutput[*dto.UserOutput], error) {
@@ -115,5 +111,10 @@ func (uc *userUseCase) GetById(id string) (*dto.UserOutput, error) {
 }
 
 func (uc *userUseCase) Delete(id string) error {
-	return uc.userRepository.Delete(id)
+	err := uc.userRepository.Delete(id)
+	if err != nil {
+		return ErrUserNotFound
+	}
+
+	return nil
 }

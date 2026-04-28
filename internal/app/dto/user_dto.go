@@ -17,13 +17,17 @@ type UserUpdateInput struct {
 }
 
 type UserOutput struct {
-	Name  string
-	Email string
+	ID        string
+	Name      string
+	Email     string
+	CreatedAt string
 }
 
 func UserEntityToOutput(e *entity.User) *UserOutput {
 	return &UserOutput{
-		Name:  e.Name,
-		Email: e.Email,
+		ID:        e.ID,
+		Name:      e.Name,
+		Email:     e.Email,
+		CreatedAt: e.CreatedAt.String(),
 	}
 }

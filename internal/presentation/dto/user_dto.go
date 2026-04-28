@@ -41,14 +41,19 @@ type UserIDURI struct {
 }
 
 type UserResponse struct {
+	ID    string `json:"id"`
 	Name  string `json:"name"`
 	Email string `json:"email"`
+
+	CreatedAt string `json:"created_at"`
 }
 
 func UserOutputToResponse(out *appDto.UserOutput) *UserResponse {
 	return &UserResponse{
-		Name:  out.Name,
-		Email: out.Email,
+		ID:        out.ID,
+		Name:      out.Name,
+		Email:     out.Email,
+		CreatedAt: out.CreatedAt,
 	}
 }
 
