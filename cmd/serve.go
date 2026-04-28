@@ -7,7 +7,7 @@ import (
 	"mob/ddd-template/internal/domain/service"
 	"mob/ddd-template/internal/infra/persistence"
 	"mob/ddd-template/internal/infra/security"
-	"mob/ddd-template/internal/presentation"
+	"mob/ddd-template/internal/presentation/handler"
 	"os"
 	"time"
 
@@ -41,7 +41,7 @@ func injectApp(injector do.Injector) {
 }
 
 func injectPresentation(injector do.Injector, server *fiber.App) {
-	presentation.RegisterUserRoutes(server, presentation.NewUserPresentation(injector))
+	handler.RegisterUserRoutes(server, handler.NewUserPresentation(injector))
 }
 
 func Serve() {

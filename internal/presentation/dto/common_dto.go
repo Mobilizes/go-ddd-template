@@ -1,9 +1,5 @@
 package dto
 
-import (
-	"mob/ddd-template/internal/app/dto"
-)
-
 const (
 	MESSAGE_FAILED_GET_DATA_FROM_BODY = "failed get data from body"
 	MESSAGE_FAILED_PROSES_REQUEST     = "failed proses request"
@@ -47,25 +43,5 @@ func BuildResponseFailed(message string, error any) Response {
 	return Response{
 		Message: message,
 		Error:   error,
-	}
-}
-
-type PaginateQuery struct {
-	Page     int    `form:"page"`
-	Limit    int    `form:"limit"`
-	Sort     string `form:"sort"`
-	SortBy   string `form:"sortBy"`
-	Filter   string `form:"filter"`
-	FilterBy string `form:"filterBy"`
-}
-
-func (q *PaginateQuery) ToAppInput() *dto.PaginateInput {
-	return &dto.PaginateInput{
-		Page:     q.Page,
-		Limit:    q.Limit,
-		Sort:     q.Sort,
-		SortBy:   q.SortBy,
-		Filter:   q.Filter,
-		FilterBy: q.FilterBy,
 	}
 }

@@ -1,4 +1,4 @@
-package presentation
+package handler
 
 import (
 	"mob/ddd-template/internal/app"
@@ -9,7 +9,7 @@ import (
 	"github.com/samber/do/v2"
 )
 
-type UserPresentation interface {
+type UserHandler interface {
 	Create(c fiber.Ctx) error
 	GetAll(c fiber.Ctx) error
 	GetById(c fiber.Ctx) error
@@ -20,13 +20,13 @@ type userPresentation struct {
 	userUseCase app.UserUseCase
 }
 
-func NewUserPresentation(i do.Injector) UserPresentation {
+func NewUserPresentation(i do.Injector) UserHandler {
 	return &userPresentation{
 		userUseCase: do.MustInvoke[app.UserUseCase](i),
 	}
 }
 
-func RegisterUserRoutes(r *fiber.App, p UserPresentation) {
+func RegisterUserRoutes(r *fiber.App, p UserHandler) {
 	userGroup := r.Group("/api/user")
 	{
 		userGroup.Post("", p.Create)
