@@ -2,9 +2,9 @@ package cmd
 
 import (
 	"fmt"
-	"mob/ddd-template/internal/app"
+	"mob/ddd-template/internal/app/usecase"
+	"mob/ddd-template/internal/app/port"
 	"mob/ddd-template/internal/domain/repository"
-	"mob/ddd-template/internal/domain/service"
 	"mob/ddd-template/internal/infra/persistence"
 	"mob/ddd-template/internal/infra/security"
 	"mob/ddd-template/internal/presentation/handler"
@@ -21,22 +21,22 @@ func injectInfra(injector do.Injector, db *gorm.DB) {
 		return persistence.NewUserPersistence(db), nil
 	})
 
-	do.Provide(injector, func(i do.Injector) (service.PasswordHasher, error) {
+	do.Provide(injector, func(i do.Injector) (port.PasswordHasher, error) {
 		return security.NewBcryptPasswordHasher(), nil
 	})
 
-	do.Provide(injector, func(i do.Injector) (service.TokenGenerator, error) {
+	do.Provide(injector, func(i do.Injector) (port.TokenGenerator, error) {
 		return security.NewJWTTokenGenerator(os.Getenv("JWT_SECRET"), 15*time.Minute), nil
 	})
 }
 
 func injectApp(injector do.Injector) {
-	do.Provide(injector, func(i do.Injector) (app.UserUseCase, error) {
-		return app.NewUserUseCase(i), nil
+	do.Provide(injector, func(i do.Injector) (usecase.UserUseCase, error) {
+		return usecase.NewUserUseCase(i), nil
 	})
 
-	do.Provide(injector, func(i do.Injector) (app.AuthUseCase, error) {
-		return app.NewAuthUseCase(i), nil
+	do.Provide(injector, func(i do.Injector) (usecase.AuthUseCase, error) {
+		return usecase.NewAuthUseCase(i), nil
 	})
 }
 

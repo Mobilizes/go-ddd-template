@@ -1,9 +1,9 @@
-package app
+package usecase
 
 import (
 	"mob/ddd-template/internal/app/dto"
+	"mob/ddd-template/internal/app/port"
 	"mob/ddd-template/internal/domain/repository"
-	"mob/ddd-template/internal/domain/service"
 
 	"github.com/samber/do/v2"
 )
@@ -14,15 +14,15 @@ type AuthUseCase interface {
 
 type authUseCase struct {
 	userRepository repository.UserRepository
-	hasher         service.PasswordHasher
-	tokenGenerator service.TokenGenerator
+	hasher         port.PasswordHasher
+	tokenGenerator port.TokenGenerator
 }
 
 func NewAuthUseCase(i do.Injector) AuthUseCase {
 	return &authUseCase{
 		userRepository: do.MustInvoke[repository.UserRepository](i),
-		hasher:         do.MustInvoke[service.PasswordHasher](i),
-		tokenGenerator: do.MustInvoke[service.TokenGenerator](i),
+		hasher:         do.MustInvoke[port.PasswordHasher](i),
+		tokenGenerator: do.MustInvoke[port.TokenGenerator](i),
 	}
 }
 
@@ -32,7 +32,7 @@ func (uc *authUseCase) Login(req dto.AuthLoginInput) (dto.AuthLoginOutput, error
 		return dto.AuthLoginOutput{}, err
 	}
 
-	if err := uc.hasher.ComparePassword(user.PasswordHash, req.Password); err != nil {
+	if err := uc.hasher.ComparePassword(user.Password, req.Password); err != nil {
 		return dto.AuthLoginOutput{}, err
 	}
 

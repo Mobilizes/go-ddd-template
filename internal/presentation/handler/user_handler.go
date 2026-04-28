@@ -1,7 +1,8 @@
 package handler
 
 import (
-	"mob/ddd-template/internal/app"
+	apperror "mob/ddd-template/internal/app/error"
+	"mob/ddd-template/internal/app/usecase"
 	"mob/ddd-template/internal/presentation/dto"
 	"net/http"
 
@@ -17,12 +18,12 @@ type UserHandler interface {
 }
 
 type userPresentation struct {
-	userUseCase app.UserUseCase
+	userUseCase usecase.UserUseCase
 }
 
 func NewUserPresentation(i do.Injector) UserHandler {
 	return &userPresentation{
-		userUseCase: do.MustInvoke[app.UserUseCase](i),
+		userUseCase: do.MustInvoke[usecase.UserUseCase](i),
 	}
 }
 
@@ -45,7 +46,7 @@ func (p *userPresentation) Create(c fiber.Ctx) error {
 
 	out, err := p.userUseCase.Create(req.ToAppInput())
 	if err != nil {
-		if err == app.ErrEmailAlreadyInUse {
+		if err == apperror.ErrEmailAlreadyInUse {
 			res := dto.BuildResponseFailed(dto.MESSAGE_FAILED_PROSES_REQUEST, err.Error())
 			return c.Status(fiber.StatusConflict).JSON(res)
 		}
@@ -86,7 +87,7 @@ func (p *userPresentation) GetById(c fiber.Ctx) error {
 	out, err := p.userUseCase.GetById(req.ID)
 	if err != nil {
 		status := fiber.StatusInternalServerError
-		if err == app.ErrUserNotFound {
+		if err == apperror.ErrUserNotFound {
 			status = fiber.StatusNotFound
 		}
 
@@ -107,7 +108,7 @@ func (p *userPresentation) Delete(c fiber.Ctx) error {
 
 	if err := p.userUseCase.Delete(req.ID); err != nil {
 		status := fiber.StatusInternalServerError
-		if err == app.ErrUserNotFound {
+		if err == apperror.ErrUserNotFound {
 			status = fiber.StatusNotFound
 		}
 

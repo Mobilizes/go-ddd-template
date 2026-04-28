@@ -1,20 +1,15 @@
-package app
+package usecase
 
 import (
-	"errors"
 	"mob/ddd-template/internal/app/dto"
+	apperror "mob/ddd-template/internal/app/error"
+	"mob/ddd-template/internal/app/port"
 	"mob/ddd-template/internal/domain/entity"
 	"mob/ddd-template/internal/domain/repository"
-	"mob/ddd-template/internal/domain/service"
 	vo "mob/ddd-template/internal/domain/valueobject"
 	"slices"
 
 	"github.com/samber/do/v2"
-)
-
-var (
-	ErrUserNotFound      = errors.New("user not found")
-	ErrEmailAlreadyInUse = errors.New("email already in use")
 )
 
 type UserUseCase interface {
@@ -26,22 +21,22 @@ type UserUseCase interface {
 
 type userUseCase struct {
 	userRepository repository.UserRepository
-	hasher         service.PasswordHasher
-	tokenGenerator service.TokenGenerator
+	hasher         port.PasswordHasher
+	tokenGenerator port.TokenGenerator
 }
 
 func NewUserUseCase(i do.Injector) UserUseCase {
 	return &userUseCase{
 		userRepository: do.MustInvoke[repository.UserRepository](i),
-		hasher:         do.MustInvoke[service.PasswordHasher](i),
-		tokenGenerator: do.MustInvoke[service.TokenGenerator](i),
+		hasher:         do.MustInvoke[port.PasswordHasher](i),
+		tokenGenerator: do.MustInvoke[port.TokenGenerator](i),
 	}
 }
 
 func (uc *userUseCase) Create(req *dto.UserCreateInput) (*dto.UserOutput, error) {
 	_, err := uc.userRepository.GetByEmail(req.Email)
 	if err == nil {
-		return &dto.UserOutput{}, ErrEmailAlreadyInUse
+		return &dto.UserOutput{}, apperror.ErrEmailAlreadyInUse
 	}
 
 	hashedPassword, err := uc.hasher.HashPassword(req.Password)
@@ -112,7 +107,7 @@ func (uc *userUseCase) GetAll(req *dto.PaginateInput) (*dto.PaginatedOutput[*dto
 func (uc *userUseCase) GetById(id string) (*dto.UserOutput, error) {
 	user, err := uc.userRepository.GetByID(id)
 	if err != nil {
-		return &dto.UserOutput{}, ErrUserNotFound
+		return &dto.UserOutput{}, apperror.ErrUserNotFound
 	}
 
 	return dto.UserEntityToOutput(user), nil
@@ -121,7 +116,7 @@ func (uc *userUseCase) GetById(id string) (*dto.UserOutput, error) {
 func (uc *userUseCase) Delete(id string) error {
 	err := uc.userRepository.Delete(id)
 	if err != nil {
-		return ErrUserNotFound
+		return apperror.ErrUserNotFound
 	}
 
 	return nil
