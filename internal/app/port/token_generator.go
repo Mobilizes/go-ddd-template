@@ -1,5 +1,6 @@
 package port
 
 type TokenGenerator interface {
-	GenerateToken(userID string) (string, error)
+	GenerateAccessToken(userID string) (string, error)
+	GenerateRefreshToken() (string, error)
 }

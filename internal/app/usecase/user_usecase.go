@@ -21,14 +21,14 @@ type UserUseCase interface {
 
 type userUseCase struct {
 	userRepository repository.UserRepository
-	hasher         port.PasswordHasher
+	hasher         port.Hasher
 	tokenGenerator port.TokenGenerator
 }
 
 func NewUserUseCase(i do.Injector) UserUseCase {
 	return &userUseCase{
 		userRepository: do.MustInvoke[repository.UserRepository](i),
-		hasher:         do.MustInvoke[port.PasswordHasher](i),
+		hasher:         do.MustInvoke[port.Hasher](i),
 		tokenGenerator: do.MustInvoke[port.TokenGenerator](i),
 	}
 }
@@ -39,7 +39,7 @@ func (uc *userUseCase) Create(req *dto.UserCreateInput) (*dto.UserOutput, error)
 		return &dto.UserOutput{}, apperror.ErrEmailAlreadyInUse
 	}
 
-	hashedPassword, err := uc.hasher.HashPassword(req.Password)
+	hashedPassword, err := uc.hasher.Hash(req.Password)
 	if err != nil {
 		return &dto.UserOutput{}, err
 	}

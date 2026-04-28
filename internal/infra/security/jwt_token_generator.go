@@ -1,6 +1,8 @@
 package security
 
 import (
+	"crypto/rand"
+	"encoding/base64"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -18,7 +20,7 @@ func NewJWTTokenGenerator(secretKey string, expiry time.Duration) *JWTTokenGener
 	}
 }
 
-func (g *JWTTokenGenerator) GenerateToken(userID string) (string, error) {
+func (g *JWTTokenGenerator) GenerateAccessToken(userID string) (string, error) {
 	claims := jwt.MapClaims{
 		"sub": userID,
 		"exp": time.Now().Add(g.expiry).Unix(),
@@ -27,4 +29,13 @@ func (g *JWTTokenGenerator) GenerateToken(userID string) (string, error) {
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	return token.SignedString([]byte(g.secretKey))
+}
+
+func (g *JWTTokenGenerator) GenerateRefreshToken() (string, error) {
+	b := make([]byte, 32)
+	if _, err := rand.Read(b); err != nil {
+		return "", err
+	}
+
+	return base64.RawURLEncoding.EncodeToString(b), nil
 }

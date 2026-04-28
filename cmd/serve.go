@@ -21,8 +21,8 @@ func injectInfra(injector do.Injector, db *gorm.DB) {
 		return persistence.NewUserPersistence(db), nil
 	})
 
-	do.Provide(injector, func(i do.Injector) (port.PasswordHasher, error) {
-		return security.NewBcryptPasswordHasher(), nil
+	do.Provide(injector, func(i do.Injector) (port.Hasher, error) {
+		return security.NewBcryptHasher(), nil
 	})
 
 	do.Provide(injector, func(i do.Injector) (port.TokenGenerator, error) {

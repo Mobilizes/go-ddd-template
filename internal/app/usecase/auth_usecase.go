@@ -14,14 +14,14 @@ type AuthUseCase interface {
 
 type authUseCase struct {
 	userRepository repository.UserRepository
-	hasher         port.PasswordHasher
+	hasher         port.Hasher
 	tokenGenerator port.TokenGenerator
 }
 
 func NewAuthUseCase(i do.Injector) AuthUseCase {
 	return &authUseCase{
 		userRepository: do.MustInvoke[repository.UserRepository](i),
-		hasher:         do.MustInvoke[port.PasswordHasher](i),
+		hasher:         do.MustInvoke[port.Hasher](i),
 		tokenGenerator: do.MustInvoke[port.TokenGenerator](i),
 	}
 }
@@ -32,11 +32,11 @@ func (uc *authUseCase) Login(req dto.AuthLoginInput) (dto.AuthLoginOutput, error
 		return dto.AuthLoginOutput{}, err
 	}
 
-	if err := uc.hasher.ComparePassword(user.Password, req.Password); err != nil {
+	if err := uc.hasher.Compare(user.Password, req.Password); err != nil {
 		return dto.AuthLoginOutput{}, err
 	}
 
-	token, err := uc.tokenGenerator.GenerateToken(user.ID)
+	token, err := uc.tokenGenerator.GenerateAccessToken(user.ID)
 	if err != nil {
 		return dto.AuthLoginOutput{}, err
 	}
