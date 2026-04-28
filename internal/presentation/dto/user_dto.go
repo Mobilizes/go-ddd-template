@@ -16,26 +16,6 @@ func (r *CreateUserRequest) ToAppInput() *appDto.UserCreateInput {
 	}
 }
 
-type GetUsersQuery struct {
-	Page     int    `form:"page"`
-	Limit    int    `form:"limit"`
-	Sort     string `form:"sort"`
-	SortBy   string `form:"sortBy"`
-	Filter   string `form:"filter"`
-	FilterBy string `form:"filterBy"`
-}
-
-func (q *GetUsersQuery) ToAppInput() *appDto.PaginateInput {
-	return &appDto.PaginateInput{
-		Page:     q.Page,
-		Limit:    q.Limit,
-		Sort:     q.Sort,
-		SortBy:   q.SortBy,
-		Filter:   q.Filter,
-		FilterBy: q.FilterBy,
-	}
-}
-
 type UserIDURI struct {
 	ID string `uri:"id" binding:"required"`
 }
@@ -58,11 +38,8 @@ func UserOutputToResponse(out *appDto.UserOutput) *UserResponse {
 }
 
 type PaginatedUserResponse struct {
-	Data      []*UserResponse `json:"data"`
-	Limit     int             `json:"limit"`
-	Page      int             `json:"page"`
-	TotalData int64           `json:"totalData"`
-	TotalPage int             `json:"totalPage"`
+	Data []*UserResponse `json:"data"`
+	Meta *Meta           `json:"meta"`
 }
 
 func PaginatedUserOutputToResponse(out *appDto.PaginatedOutput[*appDto.UserOutput]) *PaginatedUserResponse {
@@ -72,10 +49,12 @@ func PaginatedUserOutputToResponse(out *appDto.PaginatedOutput[*appDto.UserOutpu
 	}
 
 	return &PaginatedUserResponse{
-		Data:      data,
-		Limit:     out.Limit,
-		Page:      out.Page,
-		TotalData: out.TotalData,
-		TotalPage: out.TotalPage,
+		Data: data,
+		Meta: &Meta{
+			Limit:     out.Limit,
+			Page:      out.Page,
+			TotalData: out.TotalData,
+			TotalPage: out.TotalPage,
+		},
 	}
 }

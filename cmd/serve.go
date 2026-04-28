@@ -11,7 +11,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/gin-gonic/gin"
+	"github.com/gofiber/fiber/v3"
 	"github.com/samber/do/v2"
 	"gorm.io/gorm"
 )
@@ -40,7 +40,7 @@ func injectApp(injector do.Injector) {
 	})
 }
 
-func injectPresentation(injector do.Injector, server *gin.Engine) {
+func injectPresentation(injector do.Injector, server *fiber.App) {
 	presentation.RegisterUserRoutes(server, presentation.NewUserPresentation(injector))
 }
 
@@ -53,7 +53,7 @@ func Serve() {
 		return db, nil
 	})
 
-	server := gin.Default()
+	server := fiber.New()
 
 	port := os.Getenv("GOLANG_PORT")
 	if port == "" {
@@ -71,7 +71,7 @@ func Serve() {
 	injectApp(injector)
 	injectPresentation(injector, server)
 
-	if err := server.Run(serve); err != nil {
-		fmt.Errorf("error running server: %v", err)
+	if err := server.Listen(serve); err != nil {
+		fmt.Printf("error running server: %v", err)
 	}
 }

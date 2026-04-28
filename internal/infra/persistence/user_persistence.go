@@ -1,11 +1,13 @@
 package persistence
 
 import (
+	"fmt"
 	"mob/ddd-template/internal/domain/entity"
 	"mob/ddd-template/internal/domain/repository"
 	vo "mob/ddd-template/internal/domain/valueobject"
 
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 type UserPersistence struct {
@@ -24,13 +26,26 @@ func (p *UserPersistence) GetAll(opts *vo.PaginateOptions) (*vo.PaginatedResult[
 	var users []*entity.User
 	var total int64
 
-	if err := p.db.Model(&entity.User{}).Count(&total).Error; err != nil {
+	query := p.db
+
+	if opts.Filter != "" && opts.FilterBy != "" {
+		query = query.Where(
+			clause.Like{
+				Column: clause.Column{Name: opts.FilterBy},
+				Value:  "%" + opts.Filter + "%",
+			},
+		)
+	}
+
+	if err := query.Session(&gorm.Session{}).Model(&entity.User{}).Count(&total).Error; err != nil {
 		return nil, err
 	}
 
 	offset := opts.Page * opts.Limit
+	order := fmt.Sprintf("%s %s", opts.SortBy, opts.Sort)
 
-	if err := p.db.Limit(opts.Limit).Offset(offset).Find(&users).Error; err != nil {
+	query = query.Limit(opts.Limit).Offset(offset).Order(order)
+	if err := query.Find(&users).Error; err != nil {
 		return nil, err
 	}
 

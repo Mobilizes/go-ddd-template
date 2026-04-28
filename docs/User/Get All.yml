@@ -5,7 +5,26 @@ info:
 
 http:
   method: GET
-  url: "{{BASE_URL}}/api/user/"
+  url: "{{BASE_URL}}/api/user/?page=0&limit=10&sort=asc&sortBy=id&filter=use&filterBy=name"
+  params:
+    - name: page
+      value: "0"
+      type: query
+    - name: limit
+      value: "10"
+      type: query
+    - name: sort
+      value: asc
+      type: query
+    - name: sortBy
+      value: id
+      type: query
+    - name: filter
+      value: use
+      type: query
+    - name: filterBy
+      value: name
+      type: query
   auth: inherit
 
 settings:

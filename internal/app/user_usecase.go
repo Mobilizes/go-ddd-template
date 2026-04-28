@@ -7,6 +7,7 @@ import (
 	"mob/ddd-template/internal/domain/repository"
 	"mob/ddd-template/internal/domain/service"
 	vo "mob/ddd-template/internal/domain/valueobject"
+	"slices"
 
 	"github.com/samber/do/v2"
 )
@@ -64,22 +65,29 @@ func (uc *userUseCase) GetAll(req *dto.PaginateInput) (*dto.PaginatedOutput[*dto
 	}
 
 	sort := req.Sort
-	if sort == "" {
+	if sort != "asc" && sort != "desc" {
 		sort = "asc"
 	}
 
+	var allowedSort = []string{"name", "email", "created_at", "updated_at"}
 	sortBy := req.SortBy
-	if sortBy == "" {
+	if !slices.Contains(allowedSort, sortBy) {
 		sortBy = "id"
+	}
+
+	var allowedFilter = []string{"name", "email", "created_at", "updated_at"}
+	filterBy := req.FilterBy
+	if !slices.Contains(allowedFilter, filterBy) {
+		filterBy = ""
 	}
 
 	opts := vo.PaginateOptions{
 		Page:     max(0, req.Page),
 		Limit:    limit,
 		Sort:     sort,
-		SortBy:   req.SortBy,
+		SortBy:   sortBy,
 		Filter:   req.Filter,
-		FilterBy: req.FilterBy,
+		FilterBy: filterBy,
 	}
 
 	result, err := uc.userRepository.GetAll(&opts)

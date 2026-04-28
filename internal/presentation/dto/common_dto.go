@@ -1,5 +1,9 @@
 package dto
 
+import (
+	"mob/ddd-template/internal/app/dto"
+)
+
 const (
 	MESSAGE_FAILED_GET_DATA_FROM_BODY = "failed get data from body"
 	MESSAGE_FAILED_PROSES_REQUEST     = "failed proses request"
@@ -14,7 +18,14 @@ type Response struct {
 	Message string `json:"message"`
 	Data    any    `json:"data,omitempty"`
 	Error   any    `json:"error,omitempty"`
-	Meta    any    `json:"meta,omitempty"`
+	Meta    *Meta  `json:"meta,omitempty"`
+}
+
+type Meta struct {
+	Limit     int   `json:"limit"`
+	Page      int   `json:"page"`
+	TotalData int64 `json:"totalData"`
+	TotalPage int   `json:"totalPage"`
 }
 
 func BuildResponseSuccess(message string, data any) Response {
@@ -24,7 +35,7 @@ func BuildResponseSuccess(message string, data any) Response {
 	}
 }
 
-func BuildPaginatedResponseSuccess(message string, data any, meta any) Response {
+func BuildPaginatedResponseSuccess(message string, data any, meta *Meta) Response {
 	return Response{
 		Message: message,
 		Data:    data,
@@ -36,5 +47,25 @@ func BuildResponseFailed(message string, error any) Response {
 	return Response{
 		Message: message,
 		Error:   error,
+	}
+}
+
+type PaginateQuery struct {
+	Page     int    `form:"page"`
+	Limit    int    `form:"limit"`
+	Sort     string `form:"sort"`
+	SortBy   string `form:"sortBy"`
+	Filter   string `form:"filter"`
+	FilterBy string `form:"filterBy"`
+}
+
+func (q *PaginateQuery) ToAppInput() *dto.PaginateInput {
+	return &dto.PaginateInput{
+		Page:     q.Page,
+		Limit:    q.Limit,
+		Sort:     q.Sort,
+		SortBy:   q.SortBy,
+		Filter:   q.Filter,
+		FilterBy: q.FilterBy,
 	}
 }
