@@ -6,7 +6,8 @@ type AuthLoginInput struct {
 }
 
 type AuthLoginOutput struct {
-	Email string
-	Name  string
-	Token string
+	Email        string
+	Name         string
+	AccessToken  string
+	RefreshToken string
 }

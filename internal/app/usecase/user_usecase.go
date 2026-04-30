@@ -9,6 +9,7 @@ import (
 	vo "mob/ddd-template/internal/domain/valueobject"
 	"slices"
 
+	"github.com/google/uuid"
 	"github.com/samber/do/v2"
 )
 
@@ -44,7 +45,7 @@ func (uc *userUseCase) Create(req *dto.UserCreateInput) (*dto.UserOutput, error)
 		return &dto.UserOutput{}, err
 	}
 
-	user := entity.NewUser(req.Name, req.Email, hashedPassword)
+	user := entity.NewUser(uuid.NewString(), req.Name, req.Email, hashedPassword)
 
 	if err := uc.userRepository.Create(user); err != nil {
 		return &dto.UserOutput{}, err
