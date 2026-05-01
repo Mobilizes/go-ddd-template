@@ -58,7 +58,7 @@ func (p *UserPersistence) GetAll(opts *vo.PaginateOptions) (*vo.PaginatedResult[
 	}, nil
 }
 
-func (p *UserPersistence) GetByID(id string) (*entity.User, error) {
+func (p *UserPersistence) GetById(id string) (*entity.User, error) {
 	var user entity.User
 	if err := p.db.First(&user, "id = ?", id).Error; err != nil {
 		return nil, err

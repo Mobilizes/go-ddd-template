@@ -106,7 +106,7 @@ func (uc *userUseCase) GetAll(req *dto.PaginateInput) (*dto.PaginatedOutput[*dto
 }
 
 func (uc *userUseCase) GetById(id string) (*dto.UserOutput, error) {
-	user, err := uc.userRepository.GetByID(id)
+	user, err := uc.userRepository.GetById(id)
 	if err != nil {
 		return &dto.UserOutput{}, apperror.ErrUserNotFound
 	}

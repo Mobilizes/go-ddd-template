@@ -6,6 +6,7 @@ type AuthLoginInput struct {
 }
 
 type AuthLoginOutput struct {
+	ID           string
 	Email        string
 	Name         string
 	AccessToken  string

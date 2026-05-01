@@ -2,12 +2,13 @@ package cmd
 
 import (
 	"fmt"
-	"mob/ddd-template/internal/app/usecase"
 	"mob/ddd-template/internal/app/port"
+	"mob/ddd-template/internal/app/usecase"
 	"mob/ddd-template/internal/domain/repository"
 	"mob/ddd-template/internal/infra/persistence"
 	"mob/ddd-template/internal/infra/security"
 	"mob/ddd-template/internal/presentation/handler"
+	"mob/ddd-template/internal/presentation/route"
 	"os"
 	"time"
 
@@ -19,6 +20,10 @@ import (
 func injectInfra(injector do.Injector, db *gorm.DB) {
 	do.Provide(injector, func(i do.Injector) (repository.UserRepository, error) {
 		return persistence.NewUserPersistence(db), nil
+	})
+
+	do.Provide(injector, func(i do.Injector) (repository.RefreshTokenRepository, error) {
+		return persistence.NewRefreshTokenPersistence(db), nil
 	})
 
 	do.Provide(injector, func(i do.Injector) (port.Hasher, error) {
@@ -41,7 +46,8 @@ func injectApp(injector do.Injector) {
 }
 
 func injectPresentation(injector do.Injector, server *fiber.App) {
-	handler.RegisterUserRoutes(server, handler.NewUserPresentation(injector))
+	route.RegisterUser(handler.NewUserHandler(injector), server)
+	route.RegisterAuth(handler.NewAuthHandler(injector), server)
 }
 
 func Serve() {

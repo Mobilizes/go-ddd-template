@@ -2,13 +2,13 @@ package dto
 
 import appDto "mob/ddd-template/internal/app/dto"
 
-type CreateUserRequest struct {
+type CreateUserBody struct {
 	Name     string `json:"name" binding:"required"`
 	Email    string `json:"email" binding:"required,email"`
 	Password string `json:"password" binding:"required,min=8"`
 }
 
-func (r *CreateUserRequest) ToAppInput() *appDto.UserCreateInput {
+func (r *CreateUserBody) ToAppInput() *appDto.UserCreateInput {
 	return &appDto.UserCreateInput{
 		Name:     r.Name,
 		Email:    r.Email,

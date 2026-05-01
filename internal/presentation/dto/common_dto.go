@@ -2,7 +2,7 @@ package dto
 
 const (
 	MESSAGE_FAILED_GET_DATA_FROM_BODY = "failed get data from body"
-	MESSAGE_FAILED_PROSES_REQUEST     = "failed proses request"
+	MESSAGE_FAILED_PROCESS_REQUEST    = "failed proses request"
 	MESSAGE_FAILED_DENIED_ACCESS      = "denied access"
 
 	MESSAGE_SUCCESS_GET_DATA    = "success get data"

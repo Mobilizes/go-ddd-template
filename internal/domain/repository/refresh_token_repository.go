@@ -7,5 +7,6 @@ import (
 type RefreshTokenRepository interface {
 	Save(token *entity.RefreshToken) error
 	FindByTokenValue(tokenValue string) (*entity.RefreshToken, error)
-	DeleteAllByUserID(userID string) error
+	DeleteByTokenValue(tokenValue string) error
+	DeleteAllByUserId(userId string) error
 }

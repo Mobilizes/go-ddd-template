@@ -20,9 +20,9 @@ func NewJWTTokenGenerator(secretKey string, expiry time.Duration) *JWTTokenGener
 	}
 }
 
-func (g *JWTTokenGenerator) GenerateAccessToken(userID string) (string, error) {
+func (g *JWTTokenGenerator) GenerateAccessToken(userId string) (string, error) {
 	claims := jwt.MapClaims{
-		"sub": userID,
+		"sub": userId,
 		"exp": time.Now().Add(g.expiry).Unix(),
 		"iat": time.Now().Unix(),
 	}
