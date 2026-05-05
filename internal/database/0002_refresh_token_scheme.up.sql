@@ -1,6 +1,6 @@
-CREATE TABLE IF NOT EXISTS refresh_token (
+CREATE TABLE IF NOT EXISTS refresh_tokens (
   token VARCHAR(255) PRIMARY KEY,
-  user_id VARCHAR(36) NOT NULL REFERENCES users(id),
+  owner_id VARCHAR(36) NOT NULL REFERENCES users(id),
   expires_at TIMESTAMP NOT NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 )

@@ -45,9 +45,10 @@ func injectApp(injector do.Injector) {
 	})
 }
 
-func injectPresentation(injector do.Injector, server *fiber.App) {
-	route.RegisterUser(handler.NewUserHandler(injector), server)
-	route.RegisterAuth(handler.NewAuthHandler(injector), server)
+func injectPresentation(injector do.Injector, app *fiber.App) {
+	route.RegisterUser(handler.NewUserHandler(injector), app)
+	route.RegisterAuth(handler.NewAuthHandler(injector), app)
+	route.RegisterHealthCheck(app)
 }
 
 func Serve() {
@@ -59,7 +60,7 @@ func Serve() {
 		return db, nil
 	})
 
-	server := fiber.New()
+	app := fiber.New()
 
 	port := os.Getenv("GOLANG_PORT")
 	if port == "" {
@@ -75,9 +76,9 @@ func Serve() {
 
 	injectInfra(injector, db)
 	injectApp(injector)
-	injectPresentation(injector, server)
+	injectPresentation(injector, app)
 
-	if err := server.Listen(serve); err != nil {
+	if err := app.Listen(serve, fiber.ListenConfig{EnablePrintRoutes: os.Getenv("PRINT_ROUTES") == "true"}); err != nil {
 		fmt.Printf("error running server: %v", err)
 	}
 }

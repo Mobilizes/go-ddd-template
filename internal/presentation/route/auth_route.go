@@ -7,7 +7,7 @@ import (
 )
 
 func RegisterAuth(h handler.AuthHandler, r *fiber.App) {
-	authGroup := r.Group("/api/auth")
+	authGroup := r.Group("/api")
 	{
 		authGroup.Post("/login", h.Login)
 		authGroup.Post("/refresh", h.Refresh)
