@@ -44,6 +44,9 @@ func (h *authHandler) Login(ctx fiber.Ctx) error {
 		return ctx.Status(fiber.StatusInternalServerError).JSON(res)
 	}
 
+	ctx.Locals("userId", out.ID)
+	ctx.Locals("userName", out.Name)
+
 	res := dto.BuildResponseSuccess(dto.MESSAGE_SUCCESS_LOGIN, dto.AuthLoginOutputToResponse(out))
 	return ctx.Status(fiber.StatusOK).JSON(res)
 }

@@ -21,8 +21,8 @@ func (p *RefreshTokenPersistence) Save(token *entity.RefreshToken) error {
 
 func (p *RefreshTokenPersistence) FindByTokenValue(tokenValue string) (*entity.RefreshToken, error) {
 	var token entity.RefreshToken
-	if err := p.db.First(&token, "token = ?", tokenValue); err != nil {
-		return &entity.RefreshToken{}, nil
+	if err := p.db.First(&token, "token = ?", tokenValue).Error; err != nil {
+		return &entity.RefreshToken{}, err
 	}
 
 	return &token, nil
