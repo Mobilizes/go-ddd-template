@@ -49,10 +49,7 @@ func (uc *authUseCase) Login(req *dto.AuthLoginInput) (*dto.AuthLoginOutput, err
 		return &dto.AuthLoginOutput{}, err
 	}
 
-	hashedRefreshToken, err := uc.hasher.Hash(refreshToken)
-	if err != nil {
-		return &dto.AuthLoginOutput{}, err
-	}
+	hashedRefreshToken := uc.hasher.DeterministicHash(refreshToken)
 
 	refreshTokenEntity := entity.NewRefreshToken(hashedRefreshToken, user.ID, time.Now().Add(time.Hour*24))
 	if err := uc.refreshTokenRepository.Save(refreshTokenEntity); err != nil {
@@ -76,10 +73,7 @@ func (uc *authUseCase) Login(req *dto.AuthLoginInput) (*dto.AuthLoginOutput, err
 }
 
 func (uc *authUseCase) Refresh(refreshToken string) (string, error) {
-	hashedRefreshToken, err := uc.hasher.Hash(refreshToken)
-	if err != nil {
-		return "", err
-	}
+	hashedRefreshToken := uc.hasher.DeterministicHash(refreshToken)
 
 	token, err := uc.refreshTokenRepository.FindByTokenValue(hashedRefreshToken)
 	if err != nil {
@@ -100,10 +94,7 @@ func (uc *authUseCase) Refresh(refreshToken string) (string, error) {
 }
 
 func (uc *authUseCase) Logout(refreshToken string) error {
-	hashedRefreshToken, err := uc.hasher.Hash(refreshToken)
-	if err != nil {
-		return err
-	}
+	hashedRefreshToken := uc.hasher.DeterministicHash(refreshToken)
 
 	if err := uc.refreshTokenRepository.DeleteByTokenValue(hashedRefreshToken); err != nil {
 		return err

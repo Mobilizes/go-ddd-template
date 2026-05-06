@@ -13,10 +13,7 @@ import (
 	"time"
 
 	"github.com/gofiber/fiber/v3"
-	"github.com/gofiber/fiber/v3/extractors"
 	"github.com/gofiber/fiber/v3/middleware/cors"
-	"github.com/gofiber/fiber/v3/middleware/csrf"
-	"github.com/gofiber/fiber/v3/middleware/session"
 	"github.com/samber/do/v2"
 	"gorm.io/gorm"
 )
@@ -31,7 +28,7 @@ func injectInfra(injector do.Injector, db *gorm.DB) {
 	})
 
 	do.Provide(injector, func(i do.Injector) (port.Hasher, error) {
-		return security.NewBcryptHasher(), nil
+		return security.NewHasher(), nil
 	})
 
 	do.Provide(injector, func(i do.Injector) (port.TokenGenerator, error) {
@@ -67,24 +64,6 @@ func Serve() {
 	app := fiber.New()
 
 	app.Use(cors.New())
-
-	var csrfConfig csrf.Config
-
-	if os.Getenv("APP_MODE") == "prod" {
-		csrfConfig = csrf.Config{
-			CookieName:        "__Host-csrf_",
-			CookieSecure:      true,
-			CookieHTTPOnly:    true, // false for SPAs
-			CookieSameSite:    "Lax",
-			CookieSessionOnly: true,
-			Extractor:         extractors.FromHeader("X-Csrf-Token"),
-			Session:           &session.Store{},
-			// Redaction is enabled by default. Set DisableValueRedaction when you must expose tokens or storage keys in diagnostics.
-			// DisableValueRedaction: true,
-		}
-	}
-
-	app.Use(csrf.New(csrfConfig))
 
 	port := os.Getenv("GOLANG_PORT")
 	if port == "" {

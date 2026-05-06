@@ -40,7 +40,7 @@ func (uc *userUseCase) Create(req *dto.UserCreateInput) (*dto.UserOutput, error)
 		return &dto.UserOutput{}, apperror.ErrEmailAlreadyInUse
 	}
 
-	hashedPassword, err := uc.hasher.Hash(req.Password)
+	hashedPassword, err := uc.hasher.RandomHash(req.Password)
 	if err != nil {
 		return &dto.UserOutput{}, err
 	}

@@ -13,8 +13,8 @@ func Seed() {
 	db := SetUpDatabaseConnectionOrFail()
 	fmt.Println("Database connection established for seeding.")
 
-	hasher := security.NewBcryptHasher()
-	hashedPassword, err := hasher.Hash("password123")
+	hasher := security.NewHasher()
+	hashedPassword, err := hasher.RandomHash("password123")
 	if err != nil {
 		fmt.Printf("Error hashing password: %v\n", err)
 		return

@@ -1,6 +1,7 @@
 package port
 
 type Hasher interface {
-	Hash(plain string) (string, error)
+	RandomHash(plain string) (string, error)
+	DeterministicHash(plain string) string
 	Compare(hash string, plain string) error
 }
