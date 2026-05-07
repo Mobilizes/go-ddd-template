@@ -11,6 +11,7 @@ import (
 
 type AuthHandler interface {
 	Login(ctx fiber.Ctx) error
+	Me(ctx fiber.Ctx) error
 	Refresh(ctx fiber.Ctx) error
 	Logout(ctx fiber.Ctx) error
 }
@@ -44,6 +45,23 @@ func (h *authHandler) Login(ctx fiber.Ctx) error {
 	}
 
 	res := dto.BuildResponseSuccess(dto.MESSAGE_SUCCESS_LOGIN, dto.AuthLoginOutputToResponse(out))
+	return ctx.Status(fiber.StatusOK).JSON(res)
+}
+
+func (h *authHandler) Me(ctx fiber.Ctx) error {
+	userId := ctx.Locals("userId").(string)
+	if userId == "" {
+		res := dto.BuildResponseFailed(dto.MESSAGE_FAILED_PROCESS_REQUEST, "failed to get user")
+		return ctx.Status(fiber.StatusInternalServerError).JSON(res)
+	}
+
+	out, err := h.authUseCase.Me(userId)
+	if err != nil {
+		res := dto.BuildResponseFailed(dto.MESSAGE_SUCCESS_GET_DATA, err.Error())
+		return ctx.Status(fiber.StatusInternalServerError).JSON(res)
+	}
+
+	res := dto.BuildResponseSuccess(dto.MESSAGE_SUCCESS_GET_DATA, dto.UserOutputToResponse(out))
 	return ctx.Status(fiber.StatusOK).JSON(res)
 }
 

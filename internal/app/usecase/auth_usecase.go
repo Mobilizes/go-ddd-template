@@ -13,6 +13,7 @@ import (
 
 type AuthUseCase interface {
 	Login(req *dto.AuthLoginInput) (*dto.AuthLoginOutput, error)
+	Me(userId string) (*dto.UserOutput, error)
 	Refresh(refreshToken string) (string, string, error)
 	Logout(userId string) error
 }
@@ -73,25 +74,31 @@ func (uc *authUseCase) Login(req *dto.AuthLoginInput) (*dto.AuthLoginOutput, err
 	return &out, nil
 }
 
+func (uc *authUseCase) Me(userId string) (*dto.UserOutput, error) {
+	user, err := uc.userRepository.GetById(userId)
+	if err != nil {
+		return &dto.UserOutput{}, apperror.ErrUserNotFound
+	}
+
+	return dto.UserEntityToOutput(user), nil
+}
+
 func (uc *authUseCase) Refresh(refreshToken string) (string, string, error) {
 	var newRefreshToken string
-	var userID string
 	hashedRefreshToken := uc.hasher.DeterministicHash(refreshToken)
 
+	token, err := uc.refreshTokenRepository.FindByTokenValue(hashedRefreshToken)
+	if err != nil {
+		return "", "", apperror.ErrRefreshTokenExpiredOrNotFound
+	}
+
+	user, err := uc.userRepository.GetById(token.UserID)
+	if err != nil {
+		return "", "", err
+	}
+
 	if err := uc.uow.Transaction(func(repos port.UnitOfWorkRepositories) error {
-		userRepo := repos.Users()
 		refreshTokenRepo := repos.RefreshTokens()
-
-		token, err := refreshTokenRepo.FindByTokenValue(hashedRefreshToken)
-		if err != nil {
-			return apperror.ErrRefreshTokenExpiredOrNotFound
-		}
-
-		user, err := userRepo.GetById(token.UserID)
-		if err != nil {
-			return err
-		}
-		userID = user.ID
 
 		err = refreshTokenRepo.DeleteAllByUserId(user.ID)
 		if err != nil {
@@ -108,12 +115,13 @@ func (uc *authUseCase) Refresh(refreshToken string) (string, string, error) {
 		if err := refreshTokenRepo.Save(refreshTokenEntity); err != nil {
 			return err
 		}
+
 		return nil
 	}); err != nil {
 		return "", "", err
 	}
 
-	accessToken, err := uc.tokenGenerator.GenerateAccessToken(userID)
+	accessToken, err := uc.tokenGenerator.GenerateAccessToken(user.ID)
 	if err != nil {
 		return "", "", err
 	}
