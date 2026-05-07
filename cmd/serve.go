@@ -27,6 +27,10 @@ func injectInfra(injector do.Injector, db *gorm.DB) {
 		return persistence.NewRefreshTokenPersistence(db), nil
 	})
 
+	do.Provide(injector, func(i do.Injector) (port.UnitOfWork, error) {
+		return persistence.NewGormUnitOfWork(db), nil
+	})
+
 	do.Provide(injector, func(i do.Injector) (port.Hasher, error) {
 		return security.NewHasher(), nil
 	})

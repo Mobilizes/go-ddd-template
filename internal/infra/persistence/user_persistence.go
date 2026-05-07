@@ -77,10 +77,5 @@ func (p *UserPersistence) GetByEmail(email string) (*entity.User, error) {
 }
 
 func (p *UserPersistence) Delete(id string) error {
-	var user entity.User
-	if err := p.db.First(&user, "id = ?", id).Error; err != nil {
-		return err
-	}
-
-	return p.db.Delete(&user).Error
+	return p.db.Where("id = ?", id).Delete(&entity.User{}).Error
 }

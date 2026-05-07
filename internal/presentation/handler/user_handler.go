@@ -107,5 +107,5 @@ func (h *userHandler) Delete(ctx fiber.Ctx) error {
 	}
 
 	res := dto.BuildResponseSuccess(dto.MESSAGE_SUCCESS_DELETE_DATA, nil)
-	return ctx.Status(fiber.StatusNoContent).JSON(res)
+	return ctx.Status(fiber.StatusOK).JSON(res)
 }

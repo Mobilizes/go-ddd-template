@@ -1,17 +1,16 @@
 info:
-  name: Refresh
+  name: Logout
   type: http
-  seq: 2
+  seq: 3
 
 http:
   method: POST
-  url: "{{BASE_URL}}/api/refresh"
+  url: "{{BASE_URL}}/api/logout"
   body:
     type: json
     data: |-
       {
-        "refresh_token": "IX9_MtiXlqkSUbG93xjIwfCjbTRRYWmLnOAs1uNucV4"
-        
+        "refresh_token": "IX9_MtiXlqkSUbG93xjIwfCjbTRRYWmLnOAs1uNucV4" 
       }
   auth: inherit
 

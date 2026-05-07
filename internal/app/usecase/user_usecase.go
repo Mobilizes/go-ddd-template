@@ -24,6 +24,7 @@ type userUseCase struct {
 	userRepository repository.UserRepository
 	hasher         port.Hasher
 	tokenGenerator port.TokenGenerator
+	unitOfWork     port.UnitOfWork
 }
 
 func NewUserUseCase(i do.Injector) UserUseCase {
@@ -31,6 +32,7 @@ func NewUserUseCase(i do.Injector) UserUseCase {
 		userRepository: do.MustInvoke[repository.UserRepository](i),
 		hasher:         do.MustInvoke[port.Hasher](i),
 		tokenGenerator: do.MustInvoke[port.TokenGenerator](i),
+		unitOfWork:     do.MustInvoke[port.UnitOfWork](i),
 	}
 }
 
@@ -115,10 +117,25 @@ func (uc *userUseCase) GetById(id string) (*dto.UserOutput, error) {
 }
 
 func (uc *userUseCase) Delete(id string) error {
-	err := uc.userRepository.Delete(id)
-	if err != nil {
-		return apperror.ErrUserNotFound
-	}
+	return uc.unitOfWork.Transaction(func(repos port.UnitOfWorkRepositories) error {
+		userRepo := repos.Users()
+		refreshTokenRepo := repos.RefreshTokens()
 
-	return nil
+		_, err := userRepo.GetById(id)
+		if err != nil {
+			return apperror.ErrUserNotFound
+		}
+
+		err = refreshTokenRepo.DeleteAllByUserId(id)
+		if err != nil {
+			return err
+		}
+
+		err = userRepo.Delete(id)
+		if err != nil {
+			return err
+		}
+
+		return nil
+	})
 }

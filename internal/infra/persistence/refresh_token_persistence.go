@@ -28,13 +28,8 @@ func (p *RefreshTokenPersistence) FindByTokenValue(tokenValue string) (*entity.R
 	return &token, nil
 }
 
-func (p *RefreshTokenPersistence) DeleteByTokenValue(tokenValue string) error {
-	var token entity.RefreshToken
-	if err := p.db.First(&token, "token = ?", tokenValue).Error; err != nil {
-		return err
-	}
-
-	return p.db.Delete(&token).Error
+func (p *RefreshTokenPersistence) Revoke(tokenValue string) error {
+	return p.db.Where("token = ?", tokenValue).Delete(&entity.RefreshToken{}).Error
 }
 
 func (p *RefreshTokenPersistence) DeleteAllByUserId(userId string) error {
