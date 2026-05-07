@@ -13,6 +13,5 @@ func RegisterAuth(h handler.AuthHandler, r *fiber.App) {
 		authGroup.Post("/login", h.Login)
 		authGroup.Post("/refresh", middleware.IsLogin, h.Refresh)
 		authGroup.Post("/logout", middleware.IsLogin, h.Logout)
-		authGroup.Post("/logout-all", middleware.IsLogin, h.LogoutAll)
 	}
 }

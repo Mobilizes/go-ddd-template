@@ -13,9 +13,8 @@ import (
 
 type AuthUseCase interface {
 	Login(req *dto.AuthLoginInput) (*dto.AuthLoginOutput, error)
-	Refresh(refreshToken string) (string, error)
-	Logout(refreshToken string) error
-	LogoutAll(userId string) error
+	Refresh(refreshToken string) (string, string, error)
+	Logout(userId string) error
 }
 
 type authUseCase struct {
@@ -74,49 +73,55 @@ func (uc *authUseCase) Login(req *dto.AuthLoginInput) (*dto.AuthLoginOutput, err
 	return &out, nil
 }
 
-func (uc *authUseCase) Refresh(refreshToken string) (string, error) {
+func (uc *authUseCase) Refresh(refreshToken string) (string, string, error) {
+	var newRefreshToken string
+	var userID string
 	hashedRefreshToken := uc.hasher.DeterministicHash(refreshToken)
 
-	var userID string
 	if err := uc.uow.Transaction(func(repos port.UnitOfWorkRepositories) error {
-		token, err := repos.RefreshTokens().FindByTokenValue(hashedRefreshToken)
+		userRepo := repos.Users()
+		refreshTokenRepo := repos.RefreshTokens()
+
+		token, err := refreshTokenRepo.FindByTokenValue(hashedRefreshToken)
 		if err != nil {
 			return apperror.ErrRefreshTokenExpiredOrNotFound
 		}
 
-		user, err := repos.Users().GetById(token.UserID)
+		user, err := userRepo.GetById(token.UserID)
+		if err != nil {
+			return err
+		}
+		userID = user.ID
+
+		err = refreshTokenRepo.DeleteAllByUserId(user.ID)
 		if err != nil {
 			return err
 		}
 
-		userID = user.ID
+		newRefreshToken, err = uc.tokenGenerator.GenerateRefreshToken()
+		if err != nil {
+			return err
+		}
+
+		hashedRefreshToken := uc.hasher.DeterministicHash(newRefreshToken)
+		refreshTokenEntity := entity.NewRefreshToken(hashedRefreshToken, user.ID, time.Now().Add(time.Hour*24))
+		if err := refreshTokenRepo.Save(refreshTokenEntity); err != nil {
+			return err
+		}
 		return nil
 	}); err != nil {
-		return "", err
+		return "", "", err
 	}
 
 	accessToken, err := uc.tokenGenerator.GenerateAccessToken(userID)
 	if err != nil {
-		return "", err
+		return "", "", err
 	}
 
-	return accessToken, nil
+	return accessToken, newRefreshToken, nil
 }
 
-func (uc *authUseCase) Logout(refreshToken string) error {
-	hashedRefreshToken := uc.hasher.DeterministicHash(refreshToken)
-
-	return uc.uow.Transaction(func(repos port.UnitOfWorkRepositories) error {
-		_, err := repos.RefreshTokens().FindByTokenValue(hashedRefreshToken)
-		if err != nil {
-			return apperror.ErrRefreshTokenExpiredOrNotFound
-		}
-
-		return repos.RefreshTokens().Revoke(hashedRefreshToken)
-	})
-}
-
-func (uc *authUseCase) LogoutAll(userId string) error {
+func (uc *authUseCase) Logout(userId string) error {
 	return uc.uow.Transaction(func(repos port.UnitOfWorkRepositories) error {
 		return repos.RefreshTokens().DeleteAllByUserId(userId)
 	})

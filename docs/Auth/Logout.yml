@@ -8,10 +8,7 @@ http:
   url: "{{BASE_URL}}/api/logout"
   body:
     type: json
-    data: |-
-      {
-        "refresh_token": "IX9_MtiXlqkSUbG93xjIwfCjbTRRYWmLnOAs1uNucV4" 
-      }
+    data: ""
   auth: inherit
 
 runtime:

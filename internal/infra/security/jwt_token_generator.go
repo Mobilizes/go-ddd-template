@@ -22,7 +22,7 @@ func NewJWTTokenGenerator(secretKey string, expiry time.Duration) *JWTTokenGener
 
 func (g *JWTTokenGenerator) GenerateAccessToken(userId string) (string, error) {
 	claims := jwt.MapClaims{
-		"sub": userId,
+		"id": userId,
 		"exp": time.Now().Add(g.expiry).Unix(),
 		"iat": time.Now().Unix(),
 	}

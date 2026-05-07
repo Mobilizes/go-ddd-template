@@ -13,7 +13,6 @@ type AuthHandler interface {
 	Login(ctx fiber.Ctx) error
 	Refresh(ctx fiber.Ctx) error
 	Logout(ctx fiber.Ctx) error
-	LogoutAll(ctx fiber.Ctx) error
 }
 
 type authHandler struct {
@@ -44,9 +43,6 @@ func (h *authHandler) Login(ctx fiber.Ctx) error {
 		return ctx.Status(fiber.StatusInternalServerError).JSON(res)
 	}
 
-	ctx.Locals("userId", out.ID)
-	ctx.Locals("userName", out.Name)
-
 	res := dto.BuildResponseSuccess(dto.MESSAGE_SUCCESS_LOGIN, dto.AuthLoginOutputToResponse(out))
 	return ctx.Status(fiber.StatusOK).JSON(res)
 }
@@ -58,7 +54,7 @@ func (h *authHandler) Refresh(ctx fiber.Ctx) error {
 		return ctx.Status(fiber.StatusBadRequest).JSON(res)
 	}
 
-	accessToken, err := h.authUseCase.Refresh(req.RefreshToken)
+	accessToken, refreshToken, err := h.authUseCase.Refresh(req.RefreshToken)
 	if err != nil {
 		if err == apperror.ErrRefreshTokenExpiredOrNotFound {
 			res := dto.BuildResponseFailed(dto.MESSAGE_FAILED_DENIED_ACCESS, err.Error())
@@ -70,39 +66,24 @@ func (h *authHandler) Refresh(ctx fiber.Ctx) error {
 	}
 
 	res := dto.BuildResponseSuccess(dto.MESSAGE_SUCCESS_REFRESH, dto.AuthRefreshResponse{
-		AccessToken: accessToken,
+		AccessToken:  accessToken,
+		RefreshToken: refreshToken,
 	})
 	return ctx.Status(fiber.StatusOK).JSON(res)
 }
 
 func (h *authHandler) Logout(ctx fiber.Ctx) error {
-	var req dto.RefreshTokenBody
-	if err := ctx.Bind().Body(&req); err != nil {
-		res := dto.BuildResponseFailed(dto.MESSAGE_FAILED_PROCESS_REQUEST, err.Error())
-		return ctx.Status(fiber.StatusBadRequest).JSON(res)
+	userId := ctx.Locals("userId").(string)
+	if userId == "" {
+		res := dto.BuildResponseFailed(dto.MESSAGE_FAILED_PROCESS_REQUEST, "failed to get user")
+		return ctx.Status(fiber.StatusInternalServerError).JSON(res)
 	}
 
-	if err := h.authUseCase.Logout(req.RefreshToken); err != nil {
+	if err := h.authUseCase.Logout(userId); err != nil {
 		res := dto.BuildResponseFailed(dto.MESSAGE_FAILED_PROCESS_REQUEST, err.Error())
 		return ctx.Status(fiber.StatusInternalServerError).JSON(res)
 	}
 
 	res := dto.BuildResponseSuccess(dto.MESSAGE_SUCCESS_LOGOUT, nil)
-	return ctx.Status(fiber.StatusOK).JSON(res)
-}
-
-func (h *authHandler) LogoutAll(ctx fiber.Ctx) error {
-	var req dto.UserIDURI
-	if err := ctx.Bind().URI(&req); err != nil {
-		res := dto.BuildResponseFailed(dto.MESSAGE_FAILED_PROCESS_REQUEST, err.Error())
-		return ctx.Status(fiber.StatusBadRequest).JSON(res)
-	}
-
-	if err := h.authUseCase.LogoutAll(req.ID); err != nil {
-		res := dto.BuildResponseFailed(dto.MESSAGE_FAILED_PROCESS_REQUEST, err.Error())
-		return ctx.Status(fiber.StatusInternalServerError).JSON(res)
-	}
-
-	res := dto.BuildResponseSuccess(dto.MESSAGE_SUCCESS_LOGOUT_ALL, nil)
 	return ctx.Status(fiber.StatusOK).JSON(res)
 }

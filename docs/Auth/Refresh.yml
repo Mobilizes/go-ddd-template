@@ -10,8 +10,7 @@ http:
     type: json
     data: |-
       {
-        "refresh_token": "IX9_MtiXlqkSUbG93xjIwfCjbTRRYWmLnOAs1uNucV4"
-        
+        "refresh_token": "{{REFRESH_TOKEN}}"
       }
   auth: inherit
 
@@ -21,6 +20,9 @@ runtime:
       code: |-
         if (res.getBody() && res.body.data && res.body.data.access_token) {
           bru.setVar("TOKEN", res.body.data.access_token)
+        }
+        if (res.getBody() && res.body.data && res.body.data.refresh_token) {
+          bru.setVar("REFRESH_TOKEN", res.body.data.refresh_token)
         }
 
 settings:
