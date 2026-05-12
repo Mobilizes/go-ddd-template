@@ -119,16 +119,10 @@ func (uc *userUseCase) GetById(id string) (*dto.UserOutput, error) {
 func (uc *userUseCase) Delete(id string) error {
 	return uc.unitOfWork.Transaction(func(repos port.UnitOfWorkRepositories) error {
 		userRepo := repos.Users()
-		refreshTokenRepo := repos.RefreshTokens()
 
 		_, err := userRepo.GetById(id)
 		if err != nil {
 			return apperror.ErrUserNotFound
-		}
-
-		err = refreshTokenRepo.DeleteAllByUserId(id)
-		if err != nil {
-			return err
 		}
 
 		err = userRepo.Delete(id)
