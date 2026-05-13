@@ -7,6 +7,7 @@ import (
 	"mob/ddd-template/internal/domain/repository"
 	"mob/ddd-template/internal/infra/persistence"
 	"mob/ddd-template/internal/infra/security"
+	"mob/ddd-template/internal/infra/storage"
 	"mob/ddd-template/internal/presentation/handler"
 	"mob/ddd-template/internal/presentation/route"
 	"os"
@@ -18,7 +19,7 @@ import (
 	"gorm.io/gorm"
 )
 
-func injectInfra(injector do.Injector, db *gorm.DB) {
+func injectRepository(injector do.Injector, db *gorm.DB) {
 	do.Provide(injector, func(i do.Injector) (repository.UserRepository, error) {
 		return persistence.NewUserPersistence(db), nil
 	})
@@ -27,6 +28,12 @@ func injectInfra(injector do.Injector, db *gorm.DB) {
 		return persistence.NewRefreshTokenPersistence(db), nil
 	})
 
+	do.Provide(injector, func(i do.Injector) (repository.FileRepository, error) {
+		return persistence.NewFilePersistence(db), nil
+	})
+}
+
+func injectPort(injector do.Injector, db *gorm.DB) {
 	do.Provide(injector, func(i do.Injector) (port.UnitOfWork, error) {
 		return persistence.NewGormUnitOfWork(db), nil
 	})
@@ -38,6 +45,15 @@ func injectInfra(injector do.Injector, db *gorm.DB) {
 	do.Provide(injector, func(i do.Injector) (port.TokenGenerator, error) {
 		return security.NewJWTTokenGenerator(os.Getenv("JWT_SECRET"), 15*time.Minute), nil
 	})
+
+	do.Provide(injector, func(i do.Injector) (port.FileStorage, error) {
+		return storage.NewLocalStorage(os.Getenv("STORAGE_PATH")), nil
+	})
+}
+
+func injectInfra(injector do.Injector, db *gorm.DB) {
+	injectRepository(injector, db)
+	injectPort(injector, db)
 }
 
 func injectApp(injector do.Injector) {
