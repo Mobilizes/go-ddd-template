@@ -36,7 +36,7 @@ func (p *FilePersistence) GetAllByUser(userId string, opts *vo.PaginateOptions) 
 	var files []*entity.File
 	var total int64
 
-	query := p.db
+	query := p.db.Where("user_id = ?", userId)
 
 	if opts.Filter != "" && opts.FilterBy != "" {
 		query = query.Where(
